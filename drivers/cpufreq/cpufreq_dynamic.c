@@ -191,7 +191,7 @@ static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_STEAL];
 	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_NICE];
 
-	idle_time = cputime64_sub(cur_wall_time, busy_time);
+	idle_time = cur_wall_time - busy_time;
 	if (wall)
 		*wall = jiffies_to_usecs(cur_wall_time);
 
@@ -597,16 +597,16 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 
 		cur_idle_time = get_cpu_idle_time(j, &cur_wall_time, &cur_io_time);
 
-		wall_time = (unsigned int) cputime64_sub(cur_wall_time,
+		wall_time = (unsigned int) (cur_wall_time -
 				j_dbs_info->prev_cpu_wall);
 		j_dbs_info->prev_cpu_wall = cur_wall_time;
 
-		idle_time = (unsigned int) cputime64_sub(cur_idle_time,
+		idle_time = (unsigned int) (cur_idle_time -
 				j_dbs_info->prev_cpu_idle);
 		j_dbs_info->prev_cpu_idle = cur_idle_time;
 
 		if (dbs_tuners_ins.io_is_busy != 1 || active == 0) {
-			unsigned int io_time = (unsigned int) cputime64_sub(cur_io_time,
+			unsigned int io_time = (unsigned int) (cur_io_time -
 					j_dbs_info->prev_cpu_io);
 			j_dbs_info->prev_cpu_io = cur_io_time;
 
