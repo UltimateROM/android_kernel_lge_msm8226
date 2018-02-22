@@ -149,7 +149,11 @@ static struct clkctl_acpu_speed *__init find_cur_cpu_level(void)
 	unsigned long rate;
 	struct clk *parent;
 
+	pr_err("apcs_rcg_config: %#010x\n", (u32)apcs_rcg_config);
+
 	regval = readl_relaxed(apcs_rcg_config);
+	pr_err("regval: %#010x\n", regval);
+
 	src = regval & r->cfg_src_mask;
 	src >>= r->cfg_src_shift;
 
@@ -157,6 +161,8 @@ static struct clkctl_acpu_speed *__init find_cur_cpu_level(void)
 	div >>= r->cfg_div_shift;
 	/* No support for half-integer dividers */
 	div = div > 1 ? (div + 1) / 2 : 0;
+
+	pr_err("src: %#010x, div: %#010x\n", src, div);
 
 	for (f = priv->freq_tbl; f->khz; f++) {
 		if (f->use_for_scaling)
@@ -171,8 +177,11 @@ static struct clkctl_acpu_speed *__init find_cur_cpu_level(void)
 			break;
 	}
 
-	if (f->khz)
+	if (f->khz) {
+		pr_err("acpupll: %u kHz", f->khz);
+
 		return f;
+	}
 
 	pr_err("CPUs are running at an unknown rate. Defaulting to %u KHz.\n",
 		max->khz);
@@ -465,6 +474,14 @@ int __init acpuclk_cortex_init(struct platform_device *pdev,
 
 	acpuclk_register(&acpuclk_cortex_data);
 	cpufreq_table_init();
-
+/*
+	acpupll_kobject = kobject_create_and_add("acpupll", kernel_kobj);
+	if (!acpupll_kobject) {
+		pr_err("[acpupll] failed to create kobject interface\n");
+	}
+	rc = sysfs_create_group(acpupll_kobject, &acpupll_interface_group);
+	if (rc)
+		kobject_put(acpupll_kobject);
+*/
 	return 0;
 }

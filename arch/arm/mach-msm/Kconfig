@@ -1903,7 +1903,7 @@ config MSM_DEVFREQ_CPUBW
 
 config CPU_OVERCLOCK
 	bool "enable CPU overclocking of Cortex A7"
-	default n
+	default y
 	help
 	  Simple CPU Overclocking Option to 1.6 GHz
 

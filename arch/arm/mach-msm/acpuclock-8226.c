@@ -32,6 +32,9 @@
 
 #define RCG_CONFIG_UPDATE_BIT		BIT(0)
 
+static struct acpuclk_drv_data *priv;
+void __iomem *apcs_rcg_config;
+
 static struct msm_bus_paths bw_level_tbl_8226[] = {
 	[0] =  BW_MBPS(152), /* At least 19 MHz on bus. */
 	[1] =  BW_MBPS(300), /* At least 37.5 MHz on bus. */
@@ -41,8 +44,6 @@ static struct msm_bus_paths bw_level_tbl_8226[] = {
 	[5] = BW_MBPS(2664), /* At least 333 MHz on bus. */
 	[6] = BW_MBPS(3200), /* At least 400 MHz on bus. */
 	[7] = BW_MBPS(4264), /* At least 533 MHz on bus. */
-	[8] = BW_MBPS(4528), /* At least 566 MHz on bus. */
-	[9] = BW_MBPS(4800), /* At least 600 MHz on bus. */
 };
 
 static struct msm_bus_paths bw_level_tbl_8610[] = {
@@ -86,11 +87,11 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8226_1p1[] = {
 	{ 1,  998400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 1, 1094400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_7,   0, 7 },
-	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_8,   0, 8 },
-	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_9,   0, 8 },
-	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_10,  0, 9 },
-	{ 1, 1497600, ACPUPLL, 5, 0,   CPR_CORNER_11,  0, 9 },
-	{ 1, 1593600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 9 },
+	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_8,   0, 7 },
+	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_9,   0, 7 },
+	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_10,  0, 7 },
+	{ 1, 1497600, ACPUPLL, 5, 0,   CPR_CORNER_11,  0, 7 },
+	{ 1, 1593600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 0 }
 };
 
@@ -107,11 +108,11 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8226_1p2[] = {
 	{ 1,  998400, ACPUPLL, 5, 0,   1150000,    1150000, 7 },
 	{ 1, 1094400, ACPUPLL, 5, 0,   1150000,    1150000, 7 },
 	{ 1, 1190400, ACPUPLL, 5, 0,   1150000,    1150000, 7 },
-	{ 1, 1305600, ACPUPLL, 5, 0,   1280000,    1280000, 8 },
-	{ 1, 1344000, ACPUPLL, 5, 0,   1280000,    1280000, 8 },
-	{ 1, 1401600, ACPUPLL, 5, 0,   1280000,    1280000, 9 },
-	{ 1, 1497600, ACPUPLL, 5, 0,   1280000,    1280000, 9 },
-	{ 1, 1593600, ACPUPLL, 5, 0,   1280000,    1280000, 9 },
+	{ 1, 1305600, ACPUPLL, 5, 0,   1280000,    1280000, 7 },
+	{ 1, 1344000, ACPUPLL, 5, 0,   1280000,    1280000, 7 },
+	{ 1, 1401600, ACPUPLL, 5, 0,   1280000,    1280000, 7 },
+	{ 1, 1497600, ACPUPLL, 5, 0,   1280000,    1280000, 7 },
+	{ 1, 1593600, ACPUPLL, 5, 0,   1280000,    1280000, 7 },
 	{ 0 }
 };
 /* Carlos Jesús (KLOZZ OR TEAMMEX@XDA-Developers)	
@@ -134,8 +135,8 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8226_1p2[] = {
 	{ 1,  600000, PLL0,    4, 0,   CPR_CORNER_4,   0, 6 },
 	{ 1,  787200, ACPUPLL, 5, 0,   CPR_CORNER_4,   0, 6 },
 	{ 1,  998400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
-	{ 1, 1094400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 8 },
-	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 9 },
+	{ 1, 1094400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
+	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 0 }
 };
 
@@ -152,10 +153,10 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8226_1p4[] = {
 	{ 1,  787200, ACPUPLL, 5, 0,   CPR_CORNER_4,   0, 6 },
 	{ 1,  998400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 1, 1094400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
-	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 8 },
-	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 8 },
-	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 9 },
-	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 9 },
+	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
+	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
+	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
+	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 0 }
 };
 
@@ -170,12 +171,12 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8226_1p6[] = {
 	{ 1,  787200, ACPUPLL, 5, 0,   CPR_CORNER_4,   0, 6 },
 	{ 1,  998400, ACPUPLL, 5, 0,   CPR_CORNER_5,   0, 7 },
 	{ 1, 1094400, ACPUPLL, 5, 0,   CPR_CORNER_6,   0, 7 },
-	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_7,   0, 8 },
-	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_8,   0, 8 },
-	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_9,   0, 9 },
-	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_10,  0, 9 },
-	{ 1, 1497600, ACPUPLL, 5, 0,   CPR_CORNER_11,  0, 9 },
-	{ 1, 1593600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 9 },
+	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_7,   0, 7 },
+	{ 1, 1305600, ACPUPLL, 5, 0,   CPR_CORNER_8,   0, 7 },
+	{ 1, 1344000, ACPUPLL, 5, 0,   CPR_CORNER_9,   0, 7 },
+	{ 1, 1401600, ACPUPLL, 5, 0,   CPR_CORNER_10,  0, 7 },
+	{ 1, 1497600, ACPUPLL, 5, 0,   CPR_CORNER_11,  0, 7 },
+	{ 1, 1593600, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 0 }
 };
 
@@ -185,7 +186,7 @@ static struct clkctl_acpu_speed acpu_freq_tbl_8610[] = {
 	{ 1,  600000, PLL0,    4, 0,   CPR_CORNER_4,   0, 4 },
 	{ 1,  787200, ACPUPLL, 5, 0,   CPR_CORNER_4,   0, 4 },
 	{ 1,  998400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 5 },
-	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 8 },
+	{ 1, 1190400, ACPUPLL, 5, 0,   CPR_CORNER_12,  0, 7 },
 	{ 0 }
 };
 
@@ -229,6 +230,80 @@ static struct acpuclk_drv_data drv_data = {
 #endif
 };
 
+#define ATTR_RW(_name)  \
+        static struct kobj_attribute _name##_interface = __ATTR(_name, 0644, _name##_show, _name##_store);
+
+#define ATTR_RO(_name)  \
+        static struct kobj_attribute _name##_interface = __ATTR(_name, 0444, _name##_show, NULL);
+
+#define ATTR_WO(_name)  \
+        static struct kobj_attribute _name##_interface = __ATTR(_name, 0200, _name##_show, NULL);
+
+static struct kobject *acpupll_kobject;
+
+static ssize_t acpupll_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+	//struct clkctl_acpu_speed *f;
+	//struct acpuclk_reg_data *r;
+	//void __iomem *apcs_rcg_config;
+	/*struct clk *parent;*/
+	u32 regval/*, div, src*/;
+	unsigned long /*rate, */count;
+	//char tmp_buf[100];
+/*
+	if (IS_ERR_OR_NULL(priv)) {
+		pr_err("priv is bad");
+		return -EINVAL;
+	}
+
+	f = priv->freq_tbl;
+	r = &priv->reg_data;
+
+	if (IS_ERR_OR_NULL(r)) {
+		pr_err("regdata is bad");
+		return -EINVAL;
+	}
+*/
+	//apcs_rcg_config = priv->apcs_rcg_config;
+
+	regval = readl_relaxed(apcs_rcg_config);
+/*
+	src = regval & r->cfg_src_mask;
+	src >>= r->cfg_src_shift;
+
+	div = regval & r->cfg_div_mask;
+	div >>= r->cfg_div_shift;
+	div = div > 1 ? (div + 1) / 2 : 0;
+*/
+/*
+	for (f = priv->freq_tbl; f->khz; f++) {
+		if (f->src_sel != src || f->src_div != div)
+			continue;
+
+		parent = priv->src_clocks[f->src].clk;
+		rate = parent->rate / (div ? div : 1);
+		if (f->khz * 1000 == rate)
+			break;
+	}
+*/
+	//count = sprintf(tmp_buf, "src: %#010x, div: %#010x\n", src, div);
+	//count += sprintf(buf, "regval: %#010x (%d kHz)\n%s", regval, f->khz, tmp_buf);
+	//count += sprintf(buf, "regval: %#010x\n%s", regval, tmp_buf);
+	count = sprintf(buf, "regval: %#010x\n", regval);
+
+	return count;
+}
+ATTR_RO(acpupll);
+
+static struct attribute *acpupll_attrs[] = {
+	&acpupll_interface.attr,
+	NULL,
+};
+
+static struct attribute_group acpupll_interface_group = {
+	.attrs = acpupll_attrs,
+};
+
 static int __init acpuclk_a7_probe(struct platform_device *pdev)
 {
 	struct resource *res;
@@ -244,6 +319,8 @@ static int __init acpuclk_a7_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	drv_data.apcs_rcg_config = drv_data.apcs_rcg_cmd + 4;
+	apcs_rcg_config = drv_data.apcs_rcg_config;
+	pr_err("apcs_rcg_config: %#010x\n", (u32)apcs_rcg_config);
 
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "pte_efuse");
 	if (res) {
@@ -273,6 +350,7 @@ static int __init acpuclk_a7_probe(struct platform_device *pdev)
 
 	/* Enable the always on source */
 	clk_prepare_enable(drv_data.src_clocks[PLL0].clk);
+	priv = &drv_data;
 
 	return acpuclk_cortex_init(pdev, &drv_data);
 }
@@ -299,8 +377,19 @@ void msm8610_acpu_init(void)
 
 static int __init acpuclk_a7_init(void)
 {
+	int rc;
+
 	if (cpu_is_msm8610())
 		msm8610_acpu_init();
+
+        acpupll_kobject = kobject_create_and_add("acpupll", kernel_kobj);
+        if (!acpupll_kobject) {
+                pr_err("[acpupll] failed to create kobject interface\n");
+        }
+
+        rc = sysfs_create_group(acpupll_kobject, &acpupll_interface_group);
+        if (rc)
+                kobject_put(acpupll_kobject);
 
 	return platform_driver_probe(&acpuclk_a7_driver, acpuclk_a7_probe);
 }

@@ -1907,7 +1907,6 @@ static struct i2c_driver wcd9xxx_i2c_driver = {
 	.suspend = wcd9xxx_i2c_suspend,
 };
 
-
 static int __init wcd9xxx_init(void)
 {
 	int ret[NUM_WCD9XXX_REG_RET];
@@ -1951,6 +1950,7 @@ static int __init wcd9xxx_init(void)
 		if (ret[i])
 			return ret[i];
 	}
+
 	return 0;
 }
 module_init(wcd9xxx_init);
