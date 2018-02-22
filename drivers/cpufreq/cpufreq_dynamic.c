@@ -23,7 +23,7 @@
 #include <linux/tick.h>
 #include <linux/ktime.h>
 #include <linux/sched.h>
-#include <linux/earlysuspend.h>
+#include <linux/powersuspend.h>
 #include <linux/input.h>
 #include <linux/slab.h>
 
@@ -850,14 +850,14 @@ static inline void dbs_timer_exit(struct cpu_dbs_info_s *dbs_info)
 	cancel_delayed_work_sync(&dbs_info->work);
 }
 
-/* early_suspend */
-static void dbs_suspend(struct early_suspend *handler)
+/* power_suspend */
+static void dbs_suspend(struct power_suspend *handler)
 {
 	suspend = true;
 	delay = dbs_tuners_ins.suspend_sampling_rate;
 }
 
-static void dbs_resume(struct early_suspend *handler)
+static void dbs_resume(struct power_suspend *handler)
 {
 	//unsigned int cpu;
 	struct cpu_dbs_info_s *this_dbs_info = &per_cpu(cs_cpu_dbs_info, 0);
@@ -885,8 +885,7 @@ static void dbs_resume(struct early_suspend *handler)
 	}
 }
 
-static struct early_suspend dbs_early_suspend = {
-	.level = EARLY_SUSPEND_LEVEL_DISABLE_FB,
+static struct power_suspend dbs_power_suspend = {
 	.suspend = dbs_suspend,
 	.resume = dbs_resume,
 };
@@ -1067,7 +1066,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			cpufreq_register_notifier(
 					&dbs_cpufreq_notifier_block,
 					CPUFREQ_TRANSITION_NOTIFIER);
-			register_early_suspend(&dbs_early_suspend);
+			register_power_suspend(&dbs_power_suspend);
 
 			rc = input_register_handler(&hotplug_input_handler);
 			if (rc)
@@ -1094,7 +1093,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			cpufreq_unregister_notifier(
 					&dbs_cpufreq_notifier_block,
 					CPUFREQ_TRANSITION_NOTIFIER);
-			unregister_early_suspend(&dbs_early_suspend);
+			unregister_power_suspend(&dbs_power_suspend);
 			input_unregister_handler(&hotplug_input_handler);
 		}
 
