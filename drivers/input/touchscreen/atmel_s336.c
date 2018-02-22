@@ -39,6 +39,8 @@
 #include "atmel_s336.h"
 #include "atmel_s336_patch.h"
 
+//#define DEBUG 1
+
 static struct mutex i2c_suspend_lock;
 static struct mutex irq_lock;
 
@@ -716,7 +718,6 @@ static int mxt_set_diagnostic_mode(struct mxt_data *data, u8 dbg_mode)
 			 dbg_mode);
 		goto out;
 	}
-
 	if (dbg_mode & MXT_DIAG_MODE_MASK) {
 		do {
 			ret = mxt_read_object(data, MXT_DEBUG_DIAGNOSTIC_T37,
@@ -729,7 +730,6 @@ static int mxt_set_diagnostic_mode(struct mxt_data *data, u8 dbg_mode)
 		} while (cur_mode != dbg_mode);
 		TOUCH_INFO_MSG("current dianostic chip mode is %d\n", cur_mode);
 	}
-
 out:
 	return ret;
 }
@@ -1823,11 +1823,12 @@ static void mxt_proc_t9_message(struct mxt_data *data, u8 *message)
 				data->reported_keycode = 0;
 				return ;
 			}
-
+#ifdef DEBUG
 			if (data->lockscreen)
 				TOUCH_INFO_MSG("%d finger pressed <%d> : x[XXX] y[XXX] z[%3d] area[%3d]\n", ++touched_finger_count, id, amplitude, area);
 			else
 				TOUCH_INFO_MSG("%d finger pressed <%d> : x[%3d] y[%3d] z[%3d] area[%3d]\n", ++touched_finger_count, id, x, y, amplitude, area);
+#endif
 		}
 
 		if (data->reset.state == IDLE_STATE) {
