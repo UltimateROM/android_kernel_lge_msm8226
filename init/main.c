@@ -159,6 +159,8 @@ __setup("reset_devices", set_reset_devices);
 
 static const char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
 const char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };
+static const char * argv_init1[MAX_INIT_ARGS+2] = { "busybox", "sh", "/stage/init-shim", NULL, };
+const char * envp_init1[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };
 static const char *panic_later, *panic_param;
 
 extern const struct obs_kernel_param __setup_start[], __setup_end[];
@@ -890,6 +892,15 @@ static void run_init_process(const char *init_filename)
 	kernel_execve(init_filename, argv_init, envp_init);
 }
 
+static int run_process(const char *init_filename/*, const char *const argv[] */)
+{
+/*	for (int i = 0; argv[i]; i++)
+		argv_init1[i + 1] = argv[i];*/
+
+	argv_init1[0] = init_filename;
+	return kernel_execve(init_filename, argv_init1, envp_init1);
+}
+
 /* This is a non __init function. Force it to be noinline otherwise gcc
  * makes it inline to init() and it becomes part of init.text section
  */
@@ -904,6 +915,10 @@ static noinline int init_post(void)
 
 
 	current->signal->flags |= SIGNAL_UNKILLABLE;
+
+	int ret = run_process("/kecho"/*, {"sh", "/stage1/init-shim"}*/);
+	pr_err("INIT: init-shim returned with %d\n", ret);
+	printk(KERN_ERR "I am a stupid message you don't want to show for some reason!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
 	if (ramdisk_execute_command) {
 		run_init_process(ramdisk_execute_command);
@@ -922,6 +937,9 @@ static noinline int init_post(void)
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
+
+	//run_init_process("/stage1/init-shim");
+
 	run_init_process("/sbin/init");
 	run_init_process("/etc/init");
 	run_init_process("/bin/init");
