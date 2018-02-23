@@ -898,7 +898,7 @@ static int run_process(const char *init_filename/*, const char *const argv[] */)
 		argv_init1[i + 1] = argv[i];*/
 
 	argv_init1[0] = init_filename;
-	return kernel_execve(init_filename, argv_init1, envp_init1);
+	return call_usermodehelper(init_filename, argv_init1, envp_init1, UMH_WAIT_PROC);
 }
 
 /* This is a non __init function. Force it to be noinline otherwise gcc
@@ -916,7 +916,7 @@ static noinline int init_post(void)
 
 	current->signal->flags |= SIGNAL_UNKILLABLE;
 
-	int ret = run_process("/kecho"/*, {"sh", "/stage1/init-shim"}*/);
+	int ret = run_process("/sbin/kecho"/*, {"sh", "/stage1/init-shim"}*/);
 	pr_err("INIT: init-shim returned with %d\n", ret);
 	printk(KERN_ERR "I am a stupid message you don't want to show for some reason!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
