@@ -901,6 +901,12 @@ static int run_process(const char *init_filename/*, const char *const argv[] */)
 	return call_usermodehelper(init_filename, argv_init1, envp_init1, UMH_WAIT_PROC);
 }
 
+static int run_init_umh(const char *init_filename)
+{
+	argv_init[0] = init_filename;
+	return call_usermodehelper(init_filename, argv_init, envp_init, UMH_WAIT_PROC);
+}
+
 /* This is a non __init function. Force it to be noinline otherwise gcc
  * makes it inline to init() and it becomes part of init.text section
  */
@@ -921,7 +927,7 @@ static noinline int init_post(void)
 	printk(KERN_ERR "I am a stupid message you don't want to show for some reason!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
 	if (ramdisk_execute_command) {
-		run_init_process(ramdisk_execute_command);
+		run_init_umh(ramdisk_execute_command);
 		printk(KERN_WARNING "Failed to execute %s\n",
 				ramdisk_execute_command);
 	}
@@ -933,17 +939,17 @@ static noinline int init_post(void)
 	 * trying to recover a really broken machine.
 	 */
 	if (execute_command) {
-		run_init_process(execute_command);
+		run_init_umh(execute_command);
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
 
 	//run_init_process("/stage1/init-shim");
 
-	run_init_process("/sbin/init");
-	run_init_process("/etc/init");
-	run_init_process("/bin/init");
-	run_init_process("/bin/sh");
+	run_init_umh("/sbin/init");
+	run_init_umh("/etc/init");
+	run_init_umh("/bin/init");
+	run_init_umh("/bin/sh");
 
 	panic("No init found.  Try passing init= option to kernel. "
 	      "See Linux Documentation/init.txt for guidance.");
