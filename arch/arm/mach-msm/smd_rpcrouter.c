@@ -2531,15 +2531,16 @@ late_initcall(modem_restart_late_init);
 
 static int __init rpcrouter_init(void)
 {
-	int ret;
+	int ret = 0;
 
 	msm_rpc_connect_timeout_ms = 0;
 	smd_rpcrouter_debug_mask |= SMEM_LOG;
 	debugfs_init();
+#if 0
 	ret = register_reboot_notifier(&msm_rpc_reboot_notifier);
 	if (ret)
 		pr_err("%s: Failed to register reboot notifier", __func__);
-
+#endif
 	/* Initialize what we need to start processing */
 	rpcrouter_workqueue =
 		create_singlethread_workqueue("rpcrouter");

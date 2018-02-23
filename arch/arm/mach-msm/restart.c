@@ -353,7 +353,7 @@ late_initcall(msm_pmic_restart_init);
 
 static int __init msm_restart_init(void)
 {
-#ifdef CONFIG_MSM_DLOAD_MODE
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list, &panic_blk);
 	dload_mode_addr = MSM_IMEM_BASE + DLOAD_MODE_ADDR;
 	emergency_dload_mode_addr = MSM_IMEM_BASE +

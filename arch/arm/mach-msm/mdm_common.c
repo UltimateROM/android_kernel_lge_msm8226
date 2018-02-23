@@ -787,9 +787,10 @@ static void mdm_modem_initialize_data(struct platform_device *pdev,
 	memset((void *)&mdev->mdm_panic_blk, 0,
 		   sizeof(struct notifier_block));
 	mdev->mdm_panic_blk.notifier_call  = mdm_panic_prep;
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list,
 				   &mdev->mdm_panic_blk);
-
+#endif
 	/* MDM2AP_ERRFATAL */
 	pres = platform_get_resource_byname(pdev, IORESOURCE_IO,
 							"MDM2AP_ERRFATAL");

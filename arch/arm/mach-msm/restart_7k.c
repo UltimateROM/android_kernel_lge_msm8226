@@ -84,15 +84,15 @@ static struct notifier_block msm_reboot_notifier = {
 
 static int __init msm_pm_restart_init(void)
 {
-	int ret;
+	int ret = 0;
 
 	pm_power_off = msm_pm_power_off;
 	arm_pm_restart = msm_pm_restart;
-
+#if 0
 	ret = register_reboot_notifier(&msm_reboot_notifier);
 	if (ret)
 		pr_err("Failed to register reboot notifier\n");
-
+#endif
 	return ret;
 }
 late_initcall(msm_pm_restart_init);

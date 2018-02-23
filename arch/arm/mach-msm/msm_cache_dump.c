@@ -163,16 +163,19 @@ static int msm_cache_dump_probe(struct platform_device *pdev)
 		if (ret)
 			pr_err("Could not register L2 dump area: %d\n", ret);
 	}
-
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list,
 						&msm_cache_dump_blk);
+#endif
 	return 0;
 }
 
 static int msm_cache_dump_remove(struct platform_device *pdev)
 {
+#if 0
 	atomic_notifier_chain_unregister(&panic_notifier_list,
 					&msm_cache_dump_blk);
+#endif
 	return 0;
 }
 

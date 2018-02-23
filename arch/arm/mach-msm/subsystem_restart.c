@@ -1239,10 +1239,10 @@ static struct notifier_block panic_nb = {
 static int __init ssr_init_soc_restart_orders(void)
 {
 	int i;
-
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list,
 			&panic_nb);
-
+#endif
 	if (cpu_is_msm8x60()) {
 		for (i = 0; i < ARRAY_SIZE(orders_8x60_all); i++) {
 			mutex_init(&orders_8x60_all[i]->track.lock);

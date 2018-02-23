@@ -345,8 +345,9 @@ static int __init charm_modem_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto fatal_err;
 	}
-
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list, &charm_panic_blk);
+#endif
 	charm_debugfs_init();
 
 	charm_subsys = subsys_register(&charm_subsystem);

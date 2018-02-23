@@ -292,9 +292,10 @@ static int msm_rtb_probe(struct platform_device *pdev)
 	atomic_set(&msm_rtb_idx, 0);
 	msm_rtb.step_size = 1;
 #endif
-
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list,
 						&msm_rtb_panic_blk);
+#endif
 	msm_rtb.initialized = 1;
 	return 0;
 }

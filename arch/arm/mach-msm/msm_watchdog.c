@@ -204,8 +204,10 @@ static void wdog_disable_work(struct work_struct *work)
 		}
 	}
 	enable = 0;
+#if 0
 	atomic_notifier_chain_unregister(&panic_notifier_list, &panic_blk);
 	unregister_reboot_notifier(&msm_reboot_notifier);
+#endif
 	cancel_delayed_work(&dogwork_struct);
 	/* may be suspended after the first write above */
 	__raw_writel(0, msm_wdt_base + WDT_EN);
@@ -399,13 +401,13 @@ static void init_watchdog_work(struct work_struct *work)
 
 	schedule_delayed_work_on(0, &dogwork_struct, delay_time);
 
+#if 0
 	atomic_notifier_chain_register(&panic_notifier_list,
 				       &panic_blk);
-
 	ret = register_reboot_notifier(&msm_reboot_notifier);
 	if (ret)
 		pr_err("Failed to register reboot notifier\n");
-
+#endif
 	__raw_writel(1, msm_wdt_base + WDT_EN);
 	__raw_writel(1, msm_wdt_base + WDT_RST);
 	last_pet = sched_clock();
