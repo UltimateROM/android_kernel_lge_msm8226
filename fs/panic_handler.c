@@ -25,7 +25,7 @@ static int panic_handler_panic_event(struct notifier_block *this,
 		unsigned long event, void *ptr)
 {
 	pr_emerg("kernel panic - rebooting!\n");
-	sysrq_handle_reboot(0);
+	sysrq_reboot_cmd("recovery");
 
 	return NOTIFY_DONE;
 }

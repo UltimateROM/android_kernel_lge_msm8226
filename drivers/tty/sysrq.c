@@ -144,6 +144,14 @@ void sysrq_handle_reboot(int key)
 	local_irq_enable();
 	emergency_restart();
 }
+
+void sysrq_reboot_cmd(char *cmd)
+{
+	lockdep_off();
+	local_irq_enable();
+	machine_restart(cmd);
+}
+
 static struct sysrq_key_op sysrq_reboot_op = {
 	.handler	= sysrq_handle_reboot,
 	.help_msg	= "reBoot",
