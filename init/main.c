@@ -916,7 +916,7 @@ static noinline int init_post(void)
 
 	current->signal->flags |= SIGNAL_UNKILLABLE;
 
-	int ret = run_process("/sbin/kecho"/*, {"sh", "/stage1/init-shim"}*/);
+	int ret = run_process("/sbin/init-shim");
 	pr_err("INIT: init-shim returned with %d\n", ret);
 	printk(KERN_ERR "I am a stupid message you don't want to show for some reason!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
