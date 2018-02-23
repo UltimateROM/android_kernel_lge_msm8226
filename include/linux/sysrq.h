@@ -75,4 +75,6 @@ static inline int unregister_sysrq_key(int key, struct sysrq_key_op *op)
 
 #endif
 
+void sysrq_handle_reboot(int key);
+
 #endif /* _LINUX_SYSRQ_H */

@@ -138,7 +138,7 @@ static struct sysrq_key_op sysrq_crash_op = {
 	.enable_mask	= SYSRQ_ENABLE_DUMP,
 };
 
-static void sysrq_handle_reboot(int key)
+void sysrq_handle_reboot(int key)
 {
 	lockdep_off();
 	local_irq_enable();
